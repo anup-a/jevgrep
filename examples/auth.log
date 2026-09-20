@@ -7,6 +7,6 @@
 2026-09-19T08:18:21Z ERROR db: connection pool exhausted, 0/32 available
 2026-09-19T08:19:02Z WARN  sshd[2304]: Invalid user admin from 198.51.100.7 port 41880
 2026-09-19T08:20:15Z INFO  deploy: rolled out api@v2.31.0 to 6 replicas
-2026-09-19T08:21:37Z ERROR auth: MFA challenge rejected 5 times for anup.aglawe, account locked
+2026-09-19T08:21:37Z ERROR auth: MFA challenge rejected 5 times for j.mercer, account locked
 2026-09-19T08:22:04Z INFO  metrics: flushed 18420 samples to the collector
 2026-09-19T08:23:48Z WARN  api: rate limit hit for tenant acme-corp, 429 returned

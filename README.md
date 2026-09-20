@@ -26,6 +26,19 @@ explanation. A record either clears the threshold or it does not.
 ## Install
 
 ```console
+curl -fsSL https://raw.githubusercontent.com/anup-a/jevgrep/main/install.sh | sh
+```
+
+Or directly, if you already have one of these:
+
+```console
+uv tool install git+https://github.com/anup-a/jevgrep     # recommended
+pipx install git+https://github.com/anup-a/jevgrep
+```
+
+From a clone, for hacking on it:
+
+```console
 uv sync
 uv run jevgrep --help
 ```
