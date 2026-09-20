@@ -54,6 +54,7 @@ With no `FILE`, reads stdin. **One record per line** by default, exactly like gr
 | `-l, --files-with-matches` | Print each matching origin once |
 | `-n, --line-number` | Prefix output with the line number |
 | `-q, --quiet` | Print nothing; signal via exit code |
+| `--color WHEN` | `auto` (default, when stdout is a terminal), `always`, `never` |
 | `-t, --threshold FLOAT` | Probability needed to match (default `0.5`) |
 | `--min-confidence FLOAT` | Records Jev is less sure than this about never match (default `0.0`) |
 | `-j, --jobs INT` | Requests in flight (default `8`) |
@@ -90,6 +91,11 @@ $ jevgrep --min-confidence 0.7 --explain "is this a security incident?" incident
 [p=0.98 c=0.91] 2026-09-19 root login from 203.0.113.9, no MFA
 jevgrep: 3 records were too uncertain to classify (see --explain)
 ```
+
+Under `--explain`, both numbers are coloured by how much they can be trusted — green at or
+above 0.9, amber at or above 0.7, red below — so a record the model is guessing at is obvious
+at a glance. Colour follows grep's rules: on when stdout is a terminal, off when piped,
+`NO_COLOR` respected, `--color=always` to force it. `--jsonl` output is never coloured.
 
 ## Recipes
 

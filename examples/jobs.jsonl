@@ -1,8 +1,8 @@
-{"title": "Senior Rust Engineer", "company": "Fathom", "location": "Remote (US)", "salary": "$180k-$220k"}
-{"title": "Barista", "company": "Blue Bottle", "location": "Oakland, CA", "salary": "$22/hr"}
-{"title": "Staff Backend Engineer", "company": "Kestrel", "location": "Berlin, onsite 3 days", "salary": "€110k-€135k"}
-{"title": "Platform Engineer", "company": "Northwind", "location": "Fully remote, worldwide", "salary": "$150,000 USD"}
-{"title": "Product Designer", "company": "Tilde", "location": "Remote (EU only)", "salary": "€85k"}
-{"title": "Distributed Systems Engineer", "company": "Halyard", "location": "Remote, US timezones", "salary": "USD 195,000 base"}
-{"title": "Warehouse Supervisor", "company": "Crate & Co", "location": "Newark, NJ", "salary": "$68,000"}
-{"title": "ML Infrastructure Engineer", "company": "Sable", "location": "New York, hybrid", "salary": "$210k + equity"}
+{"title":"Senior Rust Engineer","location":"Remote (US)","salary":"$180k-$220k"}
+{"title":"Barista","location":"Oakland, CA","salary":"$22/hr"}
+{"title":"Staff Backend Engineer","location":"Berlin, onsite 3 days","salary":"€110k-€135k"}
+{"title":"Platform Engineer","location":"Fully remote, worldwide","salary":"$150,000 USD"}
+{"title":"Product Designer","location":"Remote (EU only)","salary":"€85k"}
+{"title":"Distributed Systems Engineer","location":"Remote, US timezones","salary":"USD 195,000 base"}
+{"title":"Warehouse Supervisor","location":"Newark, NJ","salary":"$68,000"}
+{"title":"ML Infrastructure Engineer","location":"New York, hybrid","salary":"$210k + equity"}

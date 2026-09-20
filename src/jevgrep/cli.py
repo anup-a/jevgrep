@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import os
 import sys
 import time
 from collections.abc import Iterator, Sequence
@@ -11,6 +12,7 @@ from collections.abc import Iterator, Sequence
 import httpx
 
 from .client import ClientError, JevClient, build_proxy, build_verify
+from .colors import WHEN_CHOICES, should_color
 from .concurrency import map_ordered
 from .config import Config, ConfigError, environment_with_dotenv, load_config
 from .matcher import QUESTION_NAME, MatchOptions, Verdict, build_question, decide
@@ -54,6 +56,12 @@ def build_parser() -> argparse.ArgumentParser:
         "-j", "--jobs", type=int, default=DEFAULT_JOBS, help="requests in flight (default 8)"
     )
 
+    parser.add_argument(
+        "--color",
+        choices=WHEN_CHOICES,
+        default="auto",
+        help="colourise output: auto (default, when stdout is a terminal), always, never",
+    )
     parser.add_argument("--json", action="store_true", help="parse each input line as JSON")
     parser.add_argument("--whole", action="store_true", help="one record per file, not per line")
     parser.add_argument("--explain", action="store_true", help="prefix [p=… c=…]")
@@ -99,6 +107,7 @@ def _emit(verdict: Verdict, args: argparse.Namespace, seen: set[str]) -> None:
         explain=args.explain,
         jsonl=args.jsonl,
         with_origin=len(args.files) > 1 and not args.whole,
+        color=should_color(args.color, sys.stdout.isatty(), os.environ),
     )
     print(format_verdict(verdict, options))
 
