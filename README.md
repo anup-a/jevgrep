@@ -1,6 +1,6 @@
 # jevgrep
 
-`grep`, but the pattern is a question in English.
+`grep`, but the pattern is a question in natural language.
 
 ![jevgrep demo](docs/demo.gif)
 

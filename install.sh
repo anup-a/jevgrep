@@ -33,7 +33,7 @@ check_python() {
 }
 
 say ""
-say "  jevgrep — grep, but the pattern is a question in English."
+say "  jevgrep — grep, but the pattern is a question in natural language."
 say ""
 
 if have uv; then
