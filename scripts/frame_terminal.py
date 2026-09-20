@@ -19,9 +19,9 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-CANVAS = (1920, 1080)
 TITLE_BAR = 44
 RADIUS = 16
+DEFAULT_PADDING = 40
 
 # Diagonal gradient. Chosen to sit behind a near-black terminal without competing with it.
 GRADIENT_FROM = (79, 70, 229)  # indigo
@@ -77,15 +77,21 @@ def rounded_mask(size: tuple[int, int], radius: int, corners: tuple[bool, bool, 
     return mask
 
 
-def build(term_width: int, term_height: int, title: str, out_dir: Path) -> None:
+def build(term_width: int, term_height: int, title: str, out_dir: Path, padding: int) -> None:
     window_w, window_h = term_width, term_height + TITLE_BAR
-    origin_x = (CANVAS[0] - window_w) // 2
-    origin_y = (CANVAS[1] - window_h) // 2
 
-    backdrop = diagonal_gradient(CANVAS).convert("RGBA")
+    # Canvas is the window plus padding, rounded up to even dimensions so H.264 accepts it.
+    canvas = (
+        (window_w + 2 * padding + 1) // 2 * 2,
+        (window_h + 2 * padding + 1) // 2 * 2,
+    )
+    origin_x = (canvas[0] - window_w) // 2
+    origin_y = (canvas[1] - window_h) // 2
+
+    backdrop = diagonal_gradient(canvas).convert("RGBA")
 
     # Drop shadow: the window silhouette, blurred and pushed down.
-    shadow = Image.new("RGBA", CANVAS, (0, 0, 0, 0))
+    shadow = Image.new("RGBA", canvas, (0, 0, 0, 0))
     ImageDraw.Draw(shadow).rounded_rectangle(
         (
             origin_x,
@@ -100,7 +106,7 @@ def build(term_width: int, term_height: int, title: str, out_dir: Path) -> None:
 
     # Window body. The terminal video covers everything below the title bar, so only the
     # bar itself needs painting — but fill the whole shape so no gradient leaks at the edges.
-    window = Image.new("RGBA", CANVAS, (0, 0, 0, 0))
+    window = Image.new("RGBA", canvas, (0, 0, 0, 0))
     draw = ImageDraw.Draw(window)
     draw.rounded_rectangle(
         (origin_x, origin_y, origin_x + window_w, origin_y + window_h),
@@ -131,7 +137,9 @@ def build(term_width: int, term_height: int, title: str, out_dir: Path) -> None:
         out_dir / "mask.png"
     )
 
-    print(f"terminal overlay origin: {origin_x},{origin_y + TITLE_BAR}")
+    # ffmpeg needs both of these to place the recording; print them rather than duplicate
+    # the geometry maths in the shell.
+    print(f"canvas={canvas[0]}x{canvas[1]} overlay={origin_x}:{origin_y + TITLE_BAR}")
 
 
 def main() -> None:
@@ -140,10 +148,19 @@ def main() -> None:
     parser.add_argument("--height", type=int, required=True, help="terminal recording height")
     parser.add_argument("--title", default="jevgrep", help="title bar caption")
     parser.add_argument("--out", type=Path, default=Path("."), help="directory for the PNGs")
+    parser.add_argument(
+        "--padding",
+        type=int,
+        default=DEFAULT_PADDING,
+        help=f"pixels of backdrop around the window (default {DEFAULT_PADDING})",
+    )
     args = parser.parse_args()
 
+    if args.padding < 0:
+        parser.error("--padding cannot be negative")
+
     args.out.mkdir(parents=True, exist_ok=True)
-    build(args.width, args.height, args.title, args.out)
+    build(args.width, args.height, args.title, args.out, args.padding)
 
 
 if __name__ == "__main__":

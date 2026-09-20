@@ -30,19 +30,19 @@ clear
 sleep 0.6
 
 run "grep -cE 'ERROR|WARN' examples/auth.log"
-note "Seven. A regex can only match spelling."
+note "Seven lines contain those words."
 sleep 0.5
 
 run "jevgrep --explain 'is this an authentication failure?' examples/auth.log"
-note "Four. The 500, the pool exhaustion and the rate limit are gone."
+note "Jev answers the question itself — a probability, plus how sure it is."
 sleep 0.7
 
 run "jevgrep --json --explain 'is this role fully remote AND paid in US dollars?' examples/jobs.jsonl"
-note "Compound predicate over JSON. No embeddings. No index."
+note "Compound predicates over JSON. No embeddings, no index, ~200ms a record."
 sleep 0.7
 
 run "jevgrep --whole --explain -t 0.4 'does this module make outbound network requests?' src/jevgrep/*.py"
-note "The red one: it does not know. --min-confidence turns that into a non-match, not a guess."
+note "And when it does not know, it says so. That is the red one."
 sleep 0.9
-printf '\033[1;32m❯\033[0m \033[1mjevgrep\033[0m — grep, but the pattern is a question.\n'
+printf '\033[1;32m❯\033[0m \033[1mjevgrep\033[0m — ask your data a question.\n'
 sleep 2.4
