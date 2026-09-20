@@ -34,7 +34,11 @@ def test_a_missing_api_key_is_a_config_error():
     with pytest.raises(ConfigError) as excinfo:
         load_config({})
 
-    assert "JEVGREP_API_KEY" in str(excinfo.value)
+    # The message must name every variable that would have worked, not just one.
+    message = str(excinfo.value)
+    assert "JEVUTILS_API_KEY" in message
+    assert "JEVGREP_API_KEY" in message
+    assert "TYPESAFE_API_KEY" in message
 
 
 def test_a_blank_api_key_is_a_config_error():
@@ -45,6 +49,27 @@ def test_a_blank_api_key_is_a_config_error():
 def test_a_non_http_base_url_is_a_config_error():
     with pytest.raises(ConfigError):
         load_config({**ENV, "JEVGREP_BASE_URL": "ftp://example.com"})
+
+
+def test_jevutils_variables_are_accepted():
+    config = load_config({"JEVUTILS_API_KEY": "sk-suite", "JEVUTILS_MODEL": "m"})
+
+    assert config.api_key == "sk-suite"
+    assert config.model == "m"
+
+
+def test_jevutils_wins_over_the_older_names():
+    env = {
+        "JEVUTILS_API_KEY": "sk-new",
+        "JEVGREP_API_KEY": "sk-old",
+        "TYPESAFE_API_KEY": "sk-older",
+    }
+
+    assert load_config(env).api_key == "sk-new"
+
+
+def test_the_old_jevgrep_names_keep_working_after_the_rename():
+    assert load_config({"JEVGREP_API_KEY": "sk-old"}).api_key == "sk-old"
 
 
 def test_typesafe_variables_are_accepted_as_a_fallback():

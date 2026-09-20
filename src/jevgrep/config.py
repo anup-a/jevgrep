@@ -14,9 +14,9 @@ DEFAULT_MODEL = "typesafe-ai/jev"
 EVALUATION_PATH = "evaluation-model"
 
 # jev-ultrafast and friends already export TYPESAFE_*, so accept those as a fallback.
-_KEY_VARS = ("JEVGREP_API_KEY", "TYPESAFE_API_KEY")
-_BASE_URL_VARS = ("JEVGREP_BASE_URL", "TYPESAFE_BASE_URL")
-_MODEL_VARS = ("JEVGREP_MODEL", "TYPESAFE_MODEL")
+_KEY_VARS = ("JEVUTILS_API_KEY", "JEVGREP_API_KEY", "TYPESAFE_API_KEY")
+_BASE_URL_VARS = ("JEVUTILS_BASE_URL", "JEVGREP_BASE_URL", "TYPESAFE_BASE_URL")
+_MODEL_VARS = ("JEVUTILS_MODEL", "JEVGREP_MODEL", "TYPESAFE_MODEL")
 
 
 class ConfigError(Exception):
@@ -45,8 +45,8 @@ def load_config(env: Mapping[str, str] | None = None) -> Config:
     api_key = _first_set(env, _KEY_VARS)
     if not api_key:
         raise ConfigError(
-            "JEVGREP_API_KEY is not set. Export it, or put it in a .env file "
-            "next to where you are running jevgrep (see .env.example)."
+            f"no API key found. Set one of {', '.join(_KEY_VARS)} in the environment, "
+            "or put it in a .env file next to where you are running this (see .env.example)."
         )
 
     base_url = _first_set(env, _BASE_URL_VARS) or DEFAULT_BASE_URL

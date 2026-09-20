@@ -23,96 +23,15 @@ a pipe.
 Because Jev can only answer the question it was given, it cannot wander off and invent an
 explanation. A record either clears the threshold or it does not.
 
-## Three tools, one pipe
+## See also
 
-Each one maps a Unix verb onto a different Jev question type, so they compose the way
-coreutils do.
-
-| Tool | Unix verb | Jev question | What it does |
-|---|---|---|---|
-| `jevgrep` | `grep` | `choice` yes/no | Keep records a predicate holds for |
-| `jevsort` | `sort` | `score` | Order records by how strongly a question holds |
-| `jevuniq` | `uniq` | `choice` over groups | Collapse records that mean the same thing |
+[jevutils](https://github.com/anup-a/jevutils) adds the other two verbs, built on this
+package: `jevsort` ranks records by how strongly a question holds, and `jevuniq` collapses
+records that mean the same thing. They compose in a pipe.
 
 ```console
-$ jevuniq tickets.txt | jevsort "how urgent is this for an on-call engineer?" | jevgrep -c "is this a customer-facing outage?"
+$ jevuniq tickets.txt | jevsort "how urgent is this?" | jevgrep -c "is this an outage?"
 ```
-
-Eight tickets in, deduplicated to five, ranked, and counted. Real run over
-`examples/tickets.txt`:
-
-```console
-$ jevuniq -c examples/tickets.txt
-      3 cannot log in, the password reset email never arrives
-      2 checkout page returns a 500 for every EU customer, revenue is stopped
-      1 the footer copyright still says 2024
-      1 dark mode toggle forgets my choice after a reload
-      1 add a tooltip to the export button
-```
-
-It folded three differently-worded login complaints together, and worked out that "checkout
-returns a 500" and "PROD DOWN: all payments failing" are the same incident.
-
-```console
-$ jevsort --explain "how urgent is this for an on-call engineer right now?" examples/tickets.txt
-[3.97 c=0.98] PROD DOWN: all payments failing, customers cannot complete orders
-[3.92 c=0.93] checkout page returns a 500 for every EU customer, revenue is stopped
-[2.73 c=0.59] password reset mail is not being delivered to gmail addresses
-...
-[0.03 c=0.97] add a tooltip to the export button
-```
-
-Note the confidence column: Jev is sure about the outage and the typo, and genuinely unsure
-how urgent a password-reset failure is, because that depends on facts the ticket does not
-contain.
-
-### jevsort
-
-```
-jevsort [OPTIONS] QUESTION [FILE...]
-```
-
-Ranks highest-first. `score` questions return the expected value over the scale rather than a
-bucket index, so the ordering is continuous and ties are rare.
-
-| Flag | Meaning |
-|---|---|
-| `-r, --reverse` | Lowest first |
-| `--top N` | Keep only the N highest |
-| `--scale N` | Points on the scale, 2 to 10 (default 5) |
-| `--explain` | Prefix `[score c=confidence]` |
-| `--jsonl` | One JSON object per line |
-
-Sorting needs every record before it can emit anything, so unlike `jevgrep` this one does not
-stream.
-
-### jevuniq
-
-```
-jevuniq [OPTIONS] [FILE...]
-```
-
-Shows each record the first time its meaning appears. Instead of comparing every pair, each
-record is shown the groups found so far and asked which it belongs to, or whether it is new:
-one request per record, not N².
-
-| Flag | Meaning |
-|---|---|
-| `-c, --count` | Prefix each group's size |
-| `-d, --repeated` | Only groups with more than one member |
-| `-u, --unique` | Only groups with exactly one member |
-| `--by ASPECT` | What sameness means here, e.g. `--by "the underlying bug"` |
-| `--min-confidence F` | Never merge on an answer Jev is unsure about |
-| `--max-groups N` | Groups offered as options at once (default 24) |
-
-Two honest limitations. Grouping is **sequential** by nature, since each decision depends on
-the groups that already exist, so there is nothing to parallelise and a long file takes a
-while. And past `--max-groups`, only the most recently created groups compete for a match, so
-a record matching a much older group starts a duplicate one instead of merging.
-
-A low-confidence answer always starts a new group rather than merging. Merging is the
-destructive direction: a wrong merge hides a record from the output entirely, while a wrong
-split only costs a duplicate line you can still see.
 
 ## Install
 
