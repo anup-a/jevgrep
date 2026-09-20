@@ -105,7 +105,7 @@ def build(term_width: int, term_height: int, title: str, out_dir: Path, padding:
     backdrop = Image.alpha_composite(backdrop, shadow.filter(ImageFilter.GaussianBlur(SHADOW_BLUR)))
 
     # Window body. The terminal video covers everything below the title bar, so only the
-    # bar itself needs painting — but fill the whole shape so no gradient leaks at the edges.
+    # bar itself needs painting, but fill the whole shape so no gradient leaks at the edges.
     window = Image.new("RGBA", canvas, (0, 0, 0, 0))
     draw = ImageDraw.Draw(window)
     draw.rounded_rectangle(

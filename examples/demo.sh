@@ -34,7 +34,7 @@ note "Seven lines contain those words."
 sleep 0.5
 
 run "jevgrep --explain 'is this an authentication failure?' examples/auth.log"
-note "Jev answers the question itself — a probability, plus how sure it is."
+note "Jev answers the question itself: a probability, plus how sure it is."
 sleep 0.7
 
 run "jevgrep --json --explain 'is this role fully remote AND paid in US dollars?' examples/jobs.jsonl"
@@ -44,5 +44,5 @@ sleep 0.7
 run "jevgrep --whole --explain -t 0.4 'does this module make outbound network requests?' src/jevgrep/*.py"
 note "And when it does not know, it says so. That is the red one."
 sleep 0.9
-printf '\033[1;32m❯\033[0m \033[1mjevgrep\033[0m — ask your data a question.\n'
+printf '\033[1;32m❯\033[0m \033[1mjevgrep\033[0m: ask your data a question.\n'
 sleep 2.4

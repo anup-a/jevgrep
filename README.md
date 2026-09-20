@@ -94,7 +94,7 @@ These are two different things and the distinction is the reason this tool is wo
 - **`--threshold`** is about the *record*: how probable is it that the predicate holds?
 - **`--min-confidence`** is about the *model*: how sure is Jev of its own answer?
 
-A record can be `p=0.99, c=0.3` — "almost certainly yes, but I am guessing". Raising
+A record can be `p=0.99, c=0.3`: "almost certainly yes, but I am guessing". Raising
 `--min-confidence` pushes those into an *uncertain* bucket that never matches and is reported
 on stderr, so ambiguous records get escalated to a human (or a bigger model) instead of
 silently landing on one side.
@@ -105,8 +105,8 @@ $ jevgrep --min-confidence 0.7 --explain "is this a security incident?" incident
 jevgrep: 3 records were too uncertain to classify (see --explain)
 ```
 
-Under `--explain`, both numbers are coloured by how much they can be trusted — green at or
-above 0.9, amber at or above 0.7, red below — so a record the model is guessing at is obvious
+Under `--explain`, both numbers are coloured by how much they can be trusted: green at or
+above 0.9, amber at or above 0.7, red below. A record the model is guessing at is obvious
 at a glance. Colour follows grep's rules: on when stdout is a terminal, off when piped,
 `NO_COLOR` respected, `--color=always` to force it. `--jsonl` output is never coloured.
 
@@ -133,11 +133,11 @@ verification:
 
 - **`httpx` pins its own certifi bundle and ignores `SSL_CERT_FILE`.** jevgrep reads
   `JEVGREP_CA_BUNDLE`, then `SSL_CERT_FILE`, and builds the TLS context itself. A bundle path
-  that does not exist is an error — verification is never silently downgraded.
+  that does not exist is an error, and verification is never silently downgraded.
 - **`httpx` also inherits the macOS *system* proxy setting.** On a dev machine that is usually
   a local debugging proxy (Bifrost, Charles, mitmproxy) re-signing traffic with certificates
   OpenSSL 3 rejects outright, so requests fail for reasons unrelated to the API. jevgrep
-  honours `HTTPS_PROXY` / `ALL_PROXY` — a deliberate choice — and ignores the system-wide
+  honours `HTTPS_PROXY` / `ALL_PROXY` (a deliberate choice) and ignores the system-wide
   toggle.
 
 ## Notes
