@@ -1,0 +1,8 @@
+cannot log in, the password reset email never arrives
+checkout page returns a 500 for every EU customer, revenue is stopped
+the footer copyright still says 2024
+password reset mail is not being delivered to gmail addresses
+dark mode toggle forgets my choice after a reload
+PROD DOWN: all payments failing, customers cannot complete orders
+sign-in is broken for me, no reset mail comes through
+add a tooltip to the export button

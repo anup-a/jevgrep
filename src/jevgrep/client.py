@@ -120,6 +120,14 @@ def build_headers(config: Config) -> dict[str, str]:
     }
 
 
+def answer_confidence(payload: Mapping[str, Any], name: str) -> float | None:
+    """Jev reports confidence separately from the answer, and omits it for booleans."""
+    value = (
+        ((payload.get("providerMetadata") or {}).get("typesafe") or {}).get("confidence") or {}
+    ).get(name)
+    return float(value) if isinstance(value, (int, float)) else None
+
+
 def parse_answer(payload: Mapping[str, Any], name: str) -> tuple[float, float | None]:
     """Pull (probability, confidence) out of a gateway response body."""
     error = payload.get("error")
@@ -141,11 +149,28 @@ def parse_answer(payload: Mapping[str, Any], name: str) -> tuple[float, float | 
     if not isinstance(probability, (int, float)):
         raise ClientError(f"answer of type {answer.get('type')!r} carried no probability")
 
-    confidence = (
-        ((payload.get("providerMetadata") or {}).get("typesafe") or {}).get("confidence") or {}
-    ).get(name)
+    return float(probability), answer_confidence(payload, name)
 
-    return float(probability), float(confidence) if isinstance(confidence, (int, float)) else None
+
+def parse_score(payload: Mapping[str, Any], name: str) -> tuple[float, float | None]:
+    """Pull (score, confidence) out of a `score` answer.
+
+    The gateway's `score` is the expected value over the bucket distribution, so it is
+    continuous and usable directly as a ranking key.
+    """
+    error = payload.get("error")
+    if isinstance(error, Mapping):
+        raise ClientError(str(error.get("message", error)))
+
+    answer = (payload.get("answers") or {}).get(name)
+    if not isinstance(answer, Mapping):
+        raise ClientError(f"response carried no answer named {name!r}")
+
+    score = answer.get("score")
+    if not isinstance(score, (int, float)):
+        raise ClientError(f"answer of type {answer.get('type')!r} carried no score")
+
+    return float(score), answer_confidence(payload, name)
 
 
 def parse_cost(payload: Mapping[str, Any]) -> float:
@@ -172,7 +197,20 @@ class JevClient:
     async def evaluate(
         self, record: Record, question: Mapping[str, Any], name: str
     ) -> tuple[float, float | None]:
-        body = build_request(record.state, question, name)
+        """Probability that a yes/no question is true of the record, plus confidence."""
+        return parse_answer(await self.ask(record.state, question, name), name)
+
+    async def evaluate_score(
+        self, record: Record, question: Mapping[str, Any], name: str
+    ) -> tuple[float, float | None]:
+        """Graded score for the record, plus confidence."""
+        return parse_score(await self.ask(record.state, question, name), name)
+
+    async def ask(
+        self, state: Mapping[str, Any], question: Mapping[str, Any], name: str
+    ) -> Mapping[str, Any]:
+        """One question about one state, with retries. Returns the raw gateway payload."""
+        body = build_request(state, question, name)
         last: Exception | None = None
         advised_delay: float | None = None
 
@@ -204,16 +242,16 @@ class JevClient:
             except ValueError as exc:
                 raise ClientError(f"gateway returned non-JSON body: {response.text[:200]}") from exc
 
-            try:
-                probability, confidence = parse_answer(payload, name)
-            except ClientError as exc:
+            error = payload.get("error")
+            if isinstance(error, Mapping):
+                message = str(error.get("message", error))
                 # Overload is reported as a 200 with an error body; a bad request is final.
-                if not is_transient(str(exc)):
-                    raise
-                last = exc
+                if not is_transient(message):
+                    raise ClientError(message)
+                last = ClientError(message)
                 continue
 
             self._cost += parse_cost(payload)
-            return probability, confidence
+            return payload
 
         raise last or ClientError("request failed for an unknown reason")
