@@ -2,11 +2,17 @@
 
 `grep`, but the pattern is a question in English.
 
+![jevgrep demo](docs/demo.gif)
+
 ```console
 $ cat hn-feed.jsonl | jevgrep --json "is this about a company actually shipping something?"
 $ jevgrep --whole "does this module talk to the network?" src/**/*.py
 $ jevgrep -c "is this an authentication failure?" /var/log/app.log
 ```
+
+`grep -cE 'ERROR|WARN'` finds seven lines in the sample log. Four of them are actually
+authentication failures. A regex can only match spelling; the other three are an HTTP 500, a
+connection pool exhausting and a rate limit.
 
 No embeddings, no vector index, no build step. Each record is sent to the
 [Jev](https://vercel.com/ai-gateway) evaluation model as a typed yes/no question, which answers
